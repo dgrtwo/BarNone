@@ -18,10 +18,7 @@ lib_files = [os.path.join(flamingo_dir, "filtertree", "build",
                             "libfiltertree-lib." + ext)
                     for ext in ["so", "dylib"]]
 lib_files = [l for l in lib_files if os.path.exists(l)]
-if len(lib_files) == 0:
-    raise Exception("Cannot find .so or .dylib file for flamingo- perhaps " +
-                    "flamingo did not compile")
-lib_file = lib_files[0]
+data_files = [('.', [lib_files[0]])] if len(lib_files) > 0 else []
 
 module1 = Extension('flamingo',
                     sources=['src/flamingo.cpp'],
@@ -32,7 +29,7 @@ module1 = Extension('flamingo',
                                       for d in ["common", "util", "listmerger",
                                                 "filtertree"]],
                     #runtime_library_dirs=[os.path.join(flamingo_dir,
-                    #                                   "filtertree", "build")],
+                    #                                  "filtertree", "build")],
                     runtime_library_dirs=["$ORIGIN"],
                     libraries=['filtertree-lib'])
 
@@ -80,5 +77,5 @@ setup(name="BarNone",
       ext_modules=[module1],
       cmdclass={"build": BarNoneBuild, "test": TestCommand},
       requires=["Levenshtein"],
-      data_files=[('.', [lib_file])]
+      data_files=data_files
       )
