@@ -1,0 +1,103 @@
+#!/usr/bin/python
+
+import sys
+import argparse
+
+from BarNone import matching
+
+
+def main():
+    """Main function- parse command line arguments, and apply to file"""
+    seq_iters = {"fastq": matching.iterate_fastq, "qseq": matching.iterate_qseq,
+                   "txt": matching.iterate_txt, "fasta": matching.iterate_fasta}
+
+    DESCRIPTION = ("Match and count barcodes from a barcoded sequencing " +
+                   "run, allowing inexact matching")
+    p = argparse.ArgumentParser(description=DESCRIPTION)
+    p.add_argument("infile", type=str, help="File of raw sequencing reads")
+    p.add_argument("outfile", type=str, help="Tab-delimited output file")
+    p.add_argument("barcode_file", type=str, help="Tab-delimited file " +
+                    "mapping each strain to its barcode")
+
+    p.add_argument("-m", "--mismatches", dest="mismatches", type=int,
+                    default=3, help="number of mismatches permitted")
+    p.add_argument("-f", "--format", dest="format", type=str, default="fastq",
+                   choices=seq_iters.keys(), help="format of raw read file")
+    p.add_argument("-s", "--start", dest="start", type=int, default=4, help=
+                    "start of barcode")
+    p.add_argument("-l", "--length", dest="length", type=int, default=20, help=
+                    "length of barcode")
+    p.add_argument("--uptag", dest="uptag", type=str, default="TCT", help=
+                    "uptag indicator")
+    p.add_argument("--downtag", dest="downtag", type=str, default="TAG", help=
+                    "downtag indicator")
+    p.add_argument("--tagstart", dest="tagstart", type=int, default=1, help=
+                    "start of tag indicator")
+    p.add_argument("--taglength", dest="taglength", type=int, default=3, help=
+                    "length of tag indicator")
+    p.add_argument("--multiplexfile", dest="multiplex_file", type=str,
+                    default=None, help="multiplex file")    
+    p.add_argument("--multiplexstart", dest="multiplexstart", type=int,
+                    default=1, help="start of multiplex code")
+    p.add_argument("--multiplexlength", dest="multiplexlength", type=int,
+                    default=6, help="length of multiplex code")
+    p.add_argument("--mismatchfile", dest="mismatchfile", type=str,
+                    help="output file to describe mismatches")
+    p.add_argument("--revisedcatalog", dest="revisedcatalog", type=str,
+                    help='output file to write revised barcode catalog')
+    p.add_argument("-n", dest="n", type=int,
+                    default=None, help="run on first n reads")
+    p.add_argument("-p", dest="p", type=int,
+                    default=None, help="print report every p reads")    
+
+#     parser.add_argument('--sum', dest='accumulate', action='store_const',
+#                        const=sum, default=max,
+#                        help='sum the integers (default: find the max)')
+
+    args = p.parse_args()
+
+    # process positions
+    barcode_start = args.start - 1
+    barcode_end = barcode_start + args.length
+    tag_start = args.tagstart - 1
+    tag_end = tag_start + args.taglength
+    if args.multiplex_file:
+        multiplex_start = args.multiplexstart - 1
+        multiplex_end = multiplex_start + args.multiplexlength
+
+    track_mismatches = (args.mismatchfile != None or
+                        args.revisedcatalog != None)
+    counter = matching.BarcodeCounter(args.barcode_file, args.uptag,
+                                     args.downtag, args.multiplex_file,
+                                     track_mismatches=track_mismatches)
+
+    print_each = args.p
+    n = args.n
+
+    seq_iter = seq_iters[args.format]
+    for i, l in enumerate(seq_iter(args.infile)):
+        if print_each and i % print_each == 0:
+            print counter.report(), "\r",
+            sys.stdout.flush()
+        if n and i > n:
+            break
+
+        if args.multiplex_file:
+            multiplex_code = l[multiplex_start:multiplex_end]
+        else:
+            multiplex_code = None
+        counter.add(l[barcode_start:barcode_end],
+                    l[tag_start:tag_end], args.mismatches, multiplex_code)
+
+    print
+
+    if args.mismatchfile != None:
+        counter.mismatch_table(args.mismatchfile)
+    if args.revisedcatalog != None:
+        counter.revised_catalog(args.revisedcatalog)
+
+    counter.write_file(args.outfile)
+
+
+if __name__ == "__main__":
+    main()
