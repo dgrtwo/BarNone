@@ -1,6 +1,6 @@
 *.py
 CMakeCache.txt
 *CMakeFiles*
-Makefile
+src/*/*/*/Makefile
 build
 *.cmake
