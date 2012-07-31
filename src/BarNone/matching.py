@@ -86,15 +86,10 @@ class BarcodeCache(object):
         self.original = dict([(v, k) for k, v in barcode_dict.items()])
         self.strains = list(set(barcode_dict.values()))
         self.index = flamingo.WrapperSimpleEd(self.barcode_dict.keys())
-        self.total_looked_up = 0
-        self.total_cached = 0
-        self.total = 0
 
     def search(self, barcode, distance, verbose=False, details=False,
                 unique=False):
         """Search for the object mapping from a barcode"""
-        self.total += 1
-
         cache_match = self.cache_dicts[unique].get(barcode)
         if cache_match != None:
             # this is the closest match, so if it doesn't fit with this
@@ -102,8 +97,6 @@ class BarcodeCache(object):
             original = self.original[cache_match]
             if flamingo.distance(barcode, original) > distance:
                 return None
-
-            self.total_cached += 1
 
             return (cache_match, original) if details else cache_match
 
@@ -125,8 +118,6 @@ class BarcodeCache(object):
 
         ret = self.barcode_dict[best]
         self.cache_dicts[unique][barcode] = ret
-
-        self.total_looked_up += 1
 
         return (ret, best) if details else ret
 
