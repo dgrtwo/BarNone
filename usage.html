@@ -1,0 +1,183 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Usage &mdash; BarNone 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="BarNone 1.0 documentation" href="index.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">BarNone 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<p>BarNone is usually used directly as a script, with the following options:</p>
+<div class="section" id="input">
+<h2>Input<a class="headerlink" href="#input" title="Permalink to this headline">¶</a></h2>
+<p>Two files are used for input: one containing the sequencing results, and another containing the barcode catalog file.</p>
+<p>The sequencing file can be in any of the following formats:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://maq.sourceforge.net/fastq.shtml">fastq</a></li>
+<li><a class="reference external" href="http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml">fasta</a></li>
+<li><a class="reference external" href="http://jumpgate.caltech.edu/wiki/QSeq">qseq</a></li>
+<li>Raw text: one read per line.</li>
+</ul>
+<p>The barcode catalog file should be tab-delimited, with content analogous to:</p>
+<div class="highlight-python"><pre>YBL103C     AGTCTACCCACATGCTTTAG    ATTCATAGGACACTTGCCGG
+YBL104C     ACTCATCAGGTATGGGAACG    AATTCTAGCGCATGGTCCGG
+YBL105C     AGTGCTAATACGGCATAACG    ACACTACCTAGATGGAGCGG</pre>
+</div>
+<p>Each line has three components: a unique identifier for the gene, an uptag sequence, and a downtag sequence. The uptag and downtag sequences are each optional; if one is missing, it will be counted as having 0 reads in the output.</p>
+</div>
+<div class="section" id="output">
+<h2>Output<a class="headerlink" href="#output" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="counts">
+<h3>Counts<a class="headerlink" href="#counts" title="Permalink to this headline">¶</a></h3>
+<p>BarNone produces a tab-delimited file describing the number of reads that matched to each barcode.</p>
+<p>If the file was not multiplexed, the output counts file has three columns, such as:</p>
+<div class="highlight-python"><pre>YAL008W     352     0
+YBR255W     505     1411
+YGR164W     429     1255</pre>
+</div>
+<p>This describes, for each strain, how many up and down barcodes (respectively) were found.</p>
+<p>If the file was multiplexed using the <strong class="command">&#8211;multiplexfile</strong> option, the counts file contains two columns for each multiplexing barcode, and a header row describing each. For example:</p>
+<div class="highlight-python"><pre>Strain      Sample1|UP      Sample1|DOWN    Sample2|UP      Sample2|DOWN    Sample3|UP      Sample3|DOWN
+YAL008W     352     0       471     0       478     0
+YBR255W     505     1411    724     1319    754     1476
+YGR164W     429     1255    608     1594    596     1495</pre>
+</div>
+</div>
+<div class="section" id="revised-barcode-catalog">
+<h3>Revised Barcode Catalog<a class="headerlink" href="#revised-barcode-catalog" title="Permalink to this headline">¶</a></h3>
+<p>BarNone is capable of constructing a new barcode catalog based on common mismatches found in a sequencing file. If a mismatched version of a barcode is found more frequently than the original, BarNone replaces that barcode with the more common version. This is specified using the <strong class="command">&#8211;revisedcatalog</strong> option.</p>
+</div>
+<div class="section" id="mismatches">
+<h3>Mismatches<a class="headerlink" href="#mismatches" title="Permalink to this headline">¶</a></h3>
+<p>One can also obtain a much more detailed report about the specific mismatches using the <strong class="command">&#8211;mismatchfile</strong> option. The specified file will be written in a format analogous to:</p>
+<div class="highlight-python"><pre>YOR041C     ACATCCCGATCAGGTGACTG    23215   ACATCCCGATCAGGCGACTG (62)/CCATCCCGATCAGGTGACTG (34)/ACATCCCGATCAGNTGACTG (33)
+YEL008W     GCATCACAGCAATGGGCATA    2989    GCATCACAGCACTGGGCATA (20)/GCATCACAGCAACGGGCATA (8)/GCATCACAGCAATGGGCATC (8)
+YMR011W     GCCTCACTTAAAGCATACGA    6140    GCCTCACTTAACGCATACGA (33)/ACCTCACTTAAAGCATACGA (14)/GCATCACTTAAAGCATACGA (11)
+YDR440W     GCGGCCCTACAATTTATGAA    17      CCGGCCCTACAATTTATGAA (27840)/CCGGCCCTACACTTTATGAA (52)/ACGGCCCTACAATTTATGAA (46)</pre>
+</div>
+<p>Each line contains the name of the strain, the original barcode, the number of times the original barcode appeared in the reads, and then a slash-delimited list of the close barcodes that were matched with the number of times each of them occured.</p>
+<p>Of these four barcodes, YDR440W has a close match that is much more common than its original barcode, meaning that it would be replaced in a revised catalog.</p>
+</div>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="nutrient-starvation-data">
+<h3>Nutrient Starvation Data<a class="headerlink" href="#nutrient-starvation-data" title="Permalink to this headline">¶</a></h3>
+<p>Using the Gresham et al 2011 nutrient starvation data available <a class="reference external" href="http://genomics-pubs.princeton.edu/StarvationGenetics/download.shtml">here</a> (in this example, the file <a class="reference external" href="ftp://gen-ftp.princeton.edu/StarvationGenetics/Expt10.txt.bz2">Expt10.txt</a>), would require a command like:</p>
+<div class="highlight-python"><pre>BarNone -f fastq -m 2 Expt10.txt counts.txt barcode_catalog.txt</pre>
+</div>
+<p>This would match all barcodes in the file to a matching read in the catalog within an edit distance of 2 (set by the <tt class="docutils literal"><span class="pre">-m</span></tt> option).</p>
+<p>An example of such a barcode catalog file is available in the <tt class="file docutils literal"><span class="pre">examples/smith_et_al_2009_barcodes.txt</span></tt>.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Usage</a><ul>
+<li><a class="reference internal" href="#input">Input</a></li>
+<li><a class="reference internal" href="#output">Output</a><ul>
+<li><a class="reference internal" href="#counts">Counts</a></li>
+<li><a class="reference internal" href="#revised-barcode-catalog">Revised Barcode Catalog</a></li>
+<li><a class="reference internal" href="#mismatches">Mismatches</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#nutrient-starvation-data">Nutrient Starvation Data</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="previous chapter">Installation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/usage.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >previous</a> |</li>
+        <li><a href="index.html">BarNone 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, David Robinson.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>
