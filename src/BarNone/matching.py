@@ -7,7 +7,6 @@ Performs caching of barcodes, identifying mismatched ones using flamingo
 import copy
 import itertools
 import collections
-import warnings
 
 import flamingo
 
@@ -134,11 +133,6 @@ class BarcodeCacheMultipleLen(object):
         self.common_lengths.sort(key=lambda l: -lengths.count(l))
 
         self.descending_lengths = sorted(self.common_lengths, reverse=True)
-
-        if len(self.common_lengths) > 1:
-            warnings.warn("multiple lengths (" +
-                            ",".join(map(str, self.common_lengths)) +
-                            ") in barcode dictionary")
 
         self.barcode_caches = dict([(l, BarcodeCache(dict([(k, v)
                                         for k, v in barcode_dict.items()
