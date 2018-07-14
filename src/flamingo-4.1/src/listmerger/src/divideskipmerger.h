@@ -147,7 +147,7 @@ mergeWithoutDupls(vector<InvList*> &invLists,
     for(unsigned j = start; j < stop; j++) {	
       unsigned llindex = j - start;
       typename InvList::iterator start, end;
-      expProbe(longListsPointers[llindex], invLists[j]->end(), start, end, candis[i].id);
+      this->expProbe(longListsPointers[llindex], invLists[j]->end(), start, end, candis[i].id);
       typename InvList::iterator iter = lower_bound(start, end, candis[i].id);
       longListsPointers[llindex] = start;
       if(iter != invLists[j]->end() && *iter == candis[i].id) {
@@ -254,7 +254,7 @@ mergeWithDupls(vector<InvList*> &invLists,
   
   vector<InvList*> newInvLists;  
   vector<unsigned> newWeights;  
-  detectDuplicateLists(invLists, newInvLists, newWeights);
+  this->detectDuplicateLists(invLists, newInvLists, newWeights);
   
   // assume that newArray should be sorted according to the length increasing
   unsigned longestSize = newInvLists.at(newInvLists.size()-1)->size();  
@@ -310,7 +310,7 @@ mergeWithDupls(vector<InvList*> &invLists,
     for(unsigned j = start; j < stop; j++) {	
       unsigned llindex = j - start;
       typename InvList::iterator start, end;
-      expProbe(longListsPointers[llindex], newInvLists[j]->end(), start, end, candis[i].id);
+      this->expProbe(longListsPointers[llindex], newInvLists[j]->end(), start, end, candis[i].id);
       
       typename InvList::iterator iter = lower_bound(start, end, candis[i].id);
       longListsPointers[llindex] = iter;
@@ -465,7 +465,7 @@ getQueryStats(vector<InvList*> &invLists,
     for(unsigned j = start; j < stop; j++) {	
       unsigned llindex = j - start;
       typename InvList::iterator start, end;
-      expProbe(longListsPointers[llindex], invLists[j]->end(), start, end, candis[i].id);
+      this->expProbe(longListsPointers[llindex], invLists[j]->end(), start, end, candis[i].id);
       typename InvList::iterator iter = lower_bound(start, end, candis[i].id);      
       longListsPointers[llindex] = start;
       if(iter != invLists[j]->end() && *iter == candis[i].id) {
