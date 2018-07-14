@@ -15,6 +15,8 @@
 
 #include <set>
 
+#include <cstddef>
+
 #include "typedef.h"
 
 class CompressionArgs {
